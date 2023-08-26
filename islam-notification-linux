@@ -1,0 +1,50 @@
+#!/usr/bin/bash
+
+# Function to fetch a random Ayat from the API and display it as a notification
+fetch_random_ayat() {
+    local rand_ayat_num=$(( RANDOM % 6236 + 1 ))
+    local api_ayat="https://api.alquran.cloud/v1/ayah/$rand_ayat_num/arabic.asad"
+    local data_ayat=$(curl -s "$api_ayat")
+
+    if [ -z "$data_ayat" ]; then
+        echo "Failed to fetch data from the API"
+        exit 1
+    fi
+
+    local surah=$(echo "$data_ayat" | jq -r '.data.surah.name')
+    local text=$(echo "$data_ayat" | jq -r '.data.text')
+
+    if [ -z "$surah" ] || [ -z "$text" ]; then
+        echo "Failed to extract Surah or Text from the API response"
+        exit 1
+    fi
+
+    notify-send "$surah" "$text"
+}
+
+# Function to fetch a random Hadith from the API and display it as a notification
+fetch_random_hadith() {
+    local api_hadith="https://api.sunnah.com/v1/hadiths/random"
+    local data_hadith=$(curl -s "$api_hadith" -H 'X-API-KEY: SqD712P3E82xnwOAEOkGd5JZH8s9wRR24TqNFzjk')
+
+    if [ -z "$data_hadith" ]; then
+        echo "Failed to fetch data from the API"
+        exit 1
+    fi
+
+    local hadith=$(echo "$data_hadith" | jq -r '.hadith[1].body')
+    local sliced_hadith="${hadith:4:-4}" # Data is wrapped between <p> tags and that doesn't get rendered.
+
+    notify-send "حديث شريف" "$sliced_hadith"
+}
+
+# Set up environment variables for notify-send to work with cronjobs.
+userid=$(id -u)
+export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$userid/bus"
+export DISPLAY=:0.0
+export XAUTHORITY="/home/$LOGNAME/.Xauthority"
+
+# Call the functions to fetch and display notifications
+fetch_random_ayat
+sleep 30
+fetch_random_hadith
