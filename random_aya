@@ -1,0 +1,12 @@
+# Function to fetch a random Ayat from the API and display it as a notification
+fetch_random_ayat() {
+    local rand_ayat_num=$(( RANDOM % 6236 + 1 ))
+    local api_ayat="https://api.alquran.cloud/v1/ayah/$rand_ayat_num/arabic.asad"
+    local data_ayat=$(curl -s "$api_ayat")
+
+    if [ -z "$data_ayat" ]; then
+        echo "Failed to fetch data from the API"
+        exit 1
+    fi
+    echo $data_ayat
+}
