@@ -1,0 +1,11 @@
+# Function to fetch a random Hadith from the API and display it as a notification
+fetch_random_hadith() {
+    local api_hadith="https://api.sunnah.com/v1/hadiths/random"
+    local data_hadith=$(curl -s "$api_hadith" -H 'X-API-KEY: SqD712P3E82xnwOAEOkGd5JZH8s9wRR24TqNFzjk')
+
+    if [ -z "$data_hadith" ]; then
+        echo "Failed to fetch data from the API"
+        exit 1
+    fi
+    echo $data_hadith
+}
